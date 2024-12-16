@@ -1,7 +1,13 @@
 const express = require("express");
 const passport = require("passport");
 const router = express.Router();
+const cloudinary = require('cloudinary').v2;
 
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: +process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET
+});
 const ProjectObject = require("../models/project");
 
 const SERVER_ERROR = "SERVER_ERROR";
@@ -19,7 +25,7 @@ router.get("/list", passport.authenticate("user", { session: false }), async (re
 
 router.get("/:id", passport.authenticate("user", { session: false }), async (req, res) => {
   try {
-    const data = await ProjectObject.find({ _id: req.params.id });
+    const data = await ProjectObject.findById(req.params.id);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     console.log(error);
@@ -51,7 +57,14 @@ router.get("/", passport.authenticate("user", { session: false }), async (req, r
 router.put("/:id", passport.authenticate("user", { session: false }), async (req, res) => {
   try {
     const obj = req.body;
-
+    if (obj.image) {
+      const result = await cloudinary.uploader.upload(obj.image, {
+        overwrite: true,
+        invalidate: true,
+        width: 300, height: 300, crop: "fill"
+      });
+      obj.logo = result.secure_url;
+    }
     const data = await ProjectObject.findByIdAndUpdate(req.params.id, obj, { new: true });
 
     res.status(200).send({ ok: true, data });

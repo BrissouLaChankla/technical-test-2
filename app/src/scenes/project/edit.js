@@ -1,5 +1,5 @@
 import { Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { useHistory, useParams } from "react-router-dom";
 import Loader from "../../components/loader";
@@ -9,6 +9,9 @@ import api from "../../services/api";
 import toast from "react-hot-toast";
 
 export default function EditProject() {
+
+  const logoRef = useRef(null)
+  const [previewLogo, setPreviewLogo] = useState(null);
   const [project, setProject] = useState(null);
   const [bufferOtherLink, setBufferOtherLink] = useState("");
   const [bufferOtherLinkLabel, setBufferOtherLinkLabel] = useState("");
@@ -31,6 +34,16 @@ export default function EditProject() {
     history.push("/projects");
   }
 
+  async function convertBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result); // Résout avec la base64
+      reader.onerror = (error) => reject(error); // En cas d'erreur
+      reader.readAsDataURL(file); // Lit le fichier
+    });
+
+  }
+
   if (!project) return <Loader />;
   return (
     <div>
@@ -48,18 +61,21 @@ export default function EditProject() {
             initialValues={project}
             onSubmit={async (values) => {
               try {
+
+                if (previewLogo) values.image = await convertBase64(logoRef.current.files[0]);
                 await api.put(`/project/${project._id}`, values);
                 toast.success(`${project.name} updated!`);
                 history.push(`/project/${project._id}`);
               } catch (e) {
                 console.log(e);
-                toast.error("Some Error!");
+                toast.error("Some Error!", e.code);
               }
             }}>
             {({ values, handleChange, handleSubmit, isSubmitting }) => (
               <React.Fragment>
                 <div className="flex gap-4 pl-4 pt-4">
-                  {project.logo && <img className="w-[85px] h-[85px] border border-[#E5EAEF] rounded-[8px]" src={project.logo} alt="ProjectImage.png" />}
+                  <input type="file" accept="image/*" ref={logoRef} onChange={(e) => setPreviewLogo(URL.createObjectURL(e.target.files[0]))} />
+                  {project.logo && <img onClick={() => logoRef.current?.click()} className="w-[85px] cursor-pointer h-[85px] border border-[#E5EAEF] rounded-[8px]" src={previewLogo ? previewLogo : project.logo} alt="ProjectImage.png" />}
                 </div>
 
                 <div className="py-3 px-4">
@@ -75,7 +91,6 @@ export default function EditProject() {
                     <div className="w-full md:w-[260px] mt-2">
                       <div className="text-[14px] text-[#212325] font-medium	">Status</div>
                       <select className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" name="status" value={values.status} onChange={handleChange}>
-                        <option value=""></option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                       </select>
@@ -99,7 +114,6 @@ export default function EditProject() {
                         name="paymentCycle"
                         value={values.paymentCycle}
                         onChange={handleChange}>
-                        <option value=""></option>
                         <option value="MONTHLY">Monthly</option>
                         <option value="ONE_TIME">One time</option>
                       </select>

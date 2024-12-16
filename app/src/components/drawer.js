@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { ActivitiesIcon, HomeIcon, PeopleIcon, ProjectsIcon } from "../assets/Icons";
+import { ActivitiesIcon, HomeIcon, PeopleIcon, InfoIcon, ProjectsIcon } from "../assets/Icons";
 
 const Drawer = () => {
   return <DrawerDesktop />;
@@ -15,6 +15,7 @@ const DrawerDesktop = () => {
           <Link to="/project" title="Projects" Icon={ProjectsIcon} />
           <Link to="/activity" title="Activities" Icon={ActivitiesIcon} />
           <Link to="/user" title="People" Icon={PeopleIcon} />
+          {/* <Link to="/help" title="Help" Icon={InfoIcon} /> */}
         </Section>
 
         <div className="h-10" />
@@ -23,7 +24,7 @@ const DrawerDesktop = () => {
   );
 };
 
-const Link = ({ Icon, title, to, onClick = () => {} }) => {
+const Link = ({ Icon, title, to, onClick = () => { } }) => {
   return (
     <li>
       <NavLink

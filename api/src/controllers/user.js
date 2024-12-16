@@ -5,13 +5,15 @@ const router = express.Router();
 const UserObject = require("../models/user");
 const AuthObject = require("../auth");
 
-const { validatePassword } = require("../utils");
+const { validatePassword, validateEmail } = require("../utils");
 
 const UserAuth = new AuthObject(UserObject);
 
 const SERVER_ERROR = "SERVER_ERROR";
 const USER_ALREADY_REGISTERED = "USER_ALREADY_REGISTERED";
 const PASSWORD_NOT_VALIDATED = "PASSWORD_NOT_VALIDATED";
+const EMAIL_NOT_VALIDATED = "EMAIL_NOT_VALIDATED";
+const USER_NOT_VALIDATED = "USER_NOT_VALIDATED";
 
 router.post("/signin", (req, res) => UserAuth.signin(req, res));
 router.post("/logout", (req, res) => UserAuth.logout(req, res));
@@ -42,13 +44,15 @@ router.get("/:id", passport.authenticate("user", { session: false }), async (req
 
 router.post("/", passport.authenticate("user", { session: false }), async (req, res) => {
   try {
-    if (!validatePassword(req.body.password)) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
-
+    // TODO: Refactor validation logic 
+    if (req.body.name.length < 3) return res.status(400).send({ ok: false, user: null, code: USER_NOT_VALIDATED, message: "The name is too short" });
+    if (!validateEmail(req.body.email)) return res.status(400).send({ ok: false, user: null, code: EMAIL_NOT_VALIDATED, message: "The email is not valid" });
+    if (!validatePassword(req.body.password)) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED, message: "The password is too short" });
     const user = await UserObject.create({ ...req.body, organisation: req.user.organisation });
 
     return res.status(200).send({ data: user, ok: true });
   } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: USER_ALREADY_REGISTERED });
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: USER_ALREADY_REGISTERED, message: "User already exist" });
     console.log(error);
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
   }

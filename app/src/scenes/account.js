@@ -30,7 +30,8 @@ export default () => {
       dispatch(setUser(responseData.user));
     } catch (e) {
       console.log(e);
-      toast.error("Some Error!");
+      toast.error("Some Error!", e.code);
+
     }
     setIsLoading(false);
   }
@@ -49,7 +50,7 @@ export default () => {
               </div>
               <div className="w-full md:w-[48.5%]">
                 <div>Email</div>
-                <input className="projectsInput" value={values.email} />
+                <input className="projectsInput" value={values.email} name="email" onChange={(e) => setValues({ ...values, email: e.target.value })} />
               </div>
             </div>
             {/* second Row */}

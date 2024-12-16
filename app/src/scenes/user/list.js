@@ -12,6 +12,7 @@ const NewList = () => {
   const [usersFiltered, setUsersFiltered] = useState(null);
   const [filter, setFilter] = useState({ status: "active", availability: "", search: "" });
 
+  console.log(filter)
   useEffect(() => {
     (async () => {
       const { data } = await api.get("/user");
@@ -32,7 +33,7 @@ const NewList = () => {
         .filter((u) => !filter?.status || u.status === filter?.status)
         .filter((u) => !filter?.contract || u.contract === filter?.contract)
         .filter((u) => !filter?.availability || u.availability === filter?.availability)
-        .filter((u) => !filter?.search || u.name.toLowerCase().includes(filter?.search.toLowerCase())),
+        .filter((u) => !filter?.search || u?.name?.toLowerCase().includes(filter?.search.toLowerCase())),
     );
   }, [users, filter]);
 
@@ -118,7 +119,7 @@ const Create = () => {
                   history.push(`/user/${res.data._id}`);
                 } catch (e) {
                   console.log(e);
-                  toast.error("Some Error!", e.code);
+                  toast.error(e.message || "Some Error!", e.code);
                 }
                 setSubmitting(false);
               }}>
@@ -127,19 +128,19 @@ const Create = () => {
                   <div>
                     <div className="flex justify-between flex-wrap">
                       <div className="w-full md:w-[48%] mt-2">
-                        <div className="text-[14px] text-[#212325] font-medium	">Name</div>
-                        <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" name="username" value={values.username} onChange={handleChange} />
+                        <label className="text-[14px] text-[#212325] font-medium m-0	" htmlFor="name">Name</label>
+                        <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" id="name" name="name" value={values.name} onChange={handleChange} />
                       </div>
                       <div className="w-full md:w-[48%] mt-2">
-                        <div className="text-[14px] text-[#212325] font-medium	">Email</div>
-                        <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" name="email" value={values.email} onChange={handleChange} />
+                        <label className="text-[14px] text-[#212325] font-medium	m-0" htmlFor="email">Email</label>
+                        <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" id="email" type="email" name="email" value={values.email} onChange={handleChange} />
                       </div>
                     </div>
                     <div className="flex justify-between flex-wrap mt-3">
                       {/* Password */}
                       <div className="w-full md:w-[48%] mt-2">
-                        <div className="text-[14px] text-[#212325] font-medium	">Password</div>
-                        <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" name="password" value={values.password} onChange={handleChange} />
+                        <label className="text-[14px] text-[#212325] font-medium	m-0" htmlFor="password">Password <small className="text-gray-400">(min. 6 characters)</small></label>
+                        <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" id="password" type="password" name="password" value={values.password} onChange={handleChange} />
                       </div>
                     </div>
                   </div>

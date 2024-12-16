@@ -28,10 +28,10 @@ class Auth {
     let { password, username } = req.body;
     username = (username || "").trim().toLowerCase();
 
-    if (!username || !password) return res.status(400).send({ ok: false, code: EMAIL_AND_PASSWORD_REQUIRED });
+    if (!username || !password) return res.status(400).send({ ok: false, code: EMAIL_AND_PASSWORD_REQUIRED, message: "Missing fields" });
 
     try {
-      const user = await this.model.findOne({ name: username });
+      const user = await this.model.findOne({ name: { $regex: `^${username}$`, $options: "i" } });
       if (!user) return res.status(401).send({ ok: false, code: USER_NOT_EXISTS });
 
       const match = await user.comparePassword(password);
